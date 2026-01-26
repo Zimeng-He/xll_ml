@@ -6,34 +6,32 @@
 #include <string>
 #include <string_view>
 
+// Convert expression to string
+#define ENSURE_HASH_(x) #x
+#define ENSURE_STRZ_(x) ENSURE_HASH_(x)
+
+#ifdef _WIN32
+	//#include <Windows.h>
+	#define ENSURE_DEBUG_BREAK() DebugBreak()
+#else
+	#define ENSURE_DEBUG_BREAK() __builtin_debugtrap();
+#endif // _WIN32
+
 #ifndef ensure
 
 // Define NENSURE to turn off ensure.
 #ifdef NENSURE
-#define ensure(x) x
+	#define ensure(x) x
 #else
-#ifdef _WIN32
-#include <Windows.h>
-#define ENSURE_DEBUG_BREAK() DebugBreak()
-#else
-#define ENSURE_DEBUG_BREAK() __builtin_debugtrap();
-#endif // _WIN32
-
-#if defined(_DEBUG) && defined(DEBUG_BREAK)
-#define ensure(e) if (!(e)) { \
-		ENSURE_DEBUG_BREAK(); } else (void)0
-#else
-#define ensure(e) if (!(e)) { \
-		throw fms::error(); } else (void)0
-#endif
+	#if defined(_DEBUG) && defined(DEBUG_BREAK)
+		#define ensure(e) if (!(e)) { \
+			ENSURE_DEBUG_BREAK(); } else (void)0
+	#else
+		#define ensure(x) \
+			if (!(x)) throw fms::error(ENSURE_STRZ_(x));
+	#endif // _DEBUG && DEBUG_BREAK
 #endif // NENSURE
-
-// Convert expression to string
-#define ENSURE_HASH_(x) #x
-#define ENSURE_STRZ_(x) ENSURE_HASH_(x)
-#define ensure(x) \
-	if (!(x)) throw fms::error(ENSURE_STRZ_(x));
-#endif // NENSURE
+#endif // ensure
 
 namespace fms {
 
@@ -59,7 +57,7 @@ namespace fms {
 
 		// near: <near>
 		// here: ---^
-		error& at(const std::string_view& near, int here = 0)
+		error& at(std::string_view near, int here = 0)
 		{
 			if (!near.empty()) {
 				message.append("\nnear: ").append(near);

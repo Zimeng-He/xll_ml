@@ -3,7 +3,7 @@
 #pragma once
 #include <numeric>
 #include <span>
-#include <stdexcept>
+#include "fms_error.h"
 
 namespace fms::linalg {
 
@@ -17,15 +17,14 @@ namespace fms::linalg {
 	template<class T>
 	constexpr T dot(std::span<T> x, std::span<T> y)
 	{
-		if (x.size() != y.size()) {
-			throw std::runtime_error("dot: size mismatch");
-		}
+		ensure(x.size() == y.size());
+
 		return std::inner_product(x.begin(), x.end(), y.begin(), T(0));
 	}
 	namespace {
 		constexpr bool test_dot() {
-			constexpr double a1[] = { 1.0, 2.0, 3.0 };
 			constexpr double a2[] = { 4.0, 5.0, 6.0 };
+			constexpr double a1[] = { 1.0, 2.0, 3.0 };
 			std::span<const double> s1(a1, 3);
 			std::span<const double> s2(a2, 3);
 			// 1*4 + 2*5 + 3*6 = 4 + 10 + 18 = 32
@@ -39,6 +38,8 @@ namespace fms::linalg {
 	template<class T>
 	constexpr void axpy(T a, std::span<T> x, std::span<T> y, std::span<T> z)
 	{
+		ensure(x.size() == y.size() && y.size() == z.size());	
+
 		for (size_t i = 0; i < z.size(); ++i) {
 			z[i] = a * x[i] + y[i];
 		}
