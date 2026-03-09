@@ -19,14 +19,14 @@ AddIn xai_option_discrete_(
     .FunctionHelp(L"Return handle to discrete option pricing model.")
 );
 
-HANDLEX WINAPI xll_option_discrete_(_FP12* px, _FP12* pp)
+HANDLEX WINAPI xll_option_discrete_(_FP12* x, _FP12* p)
 {
 #pragma XLLEXPORT
     HANDLEX result = INVALID_HANDLEX;
 
     try {
-        ensure(size(*px) == size(*pp) || !"x and p must have same size");
-        handle<base<>> h_(new discrete::model<>(size(*px), px->array, pp->array));
+        ensure(size(*x) == size(*p) || !"x and p must have same size");
+        handle<base<>> h_(new discrete::model<>(size(*x), x->array, p->array));
         ensure(h_);
 
         result = h_.get();
