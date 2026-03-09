@@ -1,11 +1,12 @@
 // fms_option_discrete.h - Discrete distribution for option pricing	
 #pragma once
+#include <cmath>
 #include <valarray>
 #include "fms_option.h"
 
 namespace fms::option::discrete {
 	template<class F = double, class S = double>
-	class model : option::base<F, S> {
+	class model : public option::base<F, S> {
 		std::valarray<F> xi, pi; // P(X = x_i) = p_i
 	
 		void normalize()
@@ -26,13 +27,34 @@ namespace fms::option::discrete {
 		//   = sum_{x_i <= x} exp(s x_i - kappa(s)) pi_i
 		F _cdf(F x, S s) const override
 		{
-			return 0; // TODO: implement
+			S kappa = _cgf(s);
+			F sum = 0;
+			for (size_t i = 0; i < xi.size(); ++i) {
+				if (xi[i] <= x) {
+					sum += exp(s *xi[i] - kappa) * pi[i];
+				}
+			}
+			return sum;// TODO: implement
 		}
 	
 		// kappa(s) = log E[exp(s X)] = log sum p_i exp(s x_i)
 		S _cgf(S s) const override
 		{
-			return 0; // TODO: implement
+			S sum = 0;
+			for (size_t i = 0; i < xi.size(); ++i) {
+				sum += pi[i] * exp(s * xi[i]);
+			}
+			sum = log(sum);
+			return sum; // TODO: implement
+		}
+		const std::valarray<F>& values() const
+		{
+			return xi;
+		}
+
+		const std::valarray<F>& probs() const
+		{
+			return pi;
 		}
 	};
 } // namespace fms::option::discrete
