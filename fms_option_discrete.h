@@ -14,7 +14,8 @@ namespace fms::option::discrete {
 			pi /= pi.sum(); // pi.sum() == 1
 			F Ex = (xi * pi).sum(); // mean
 			xi -= Ex; // mean 0
-			xi /= std::sqrt((xi * xi * pi).sum()); // variance 1
+			F variance = std::sqrt((xi * xi * pi).sum());
+			xi /= variance; // variance 1
 		}
 	public:
 		model(std::size_t n, const F* x, const F* p)
